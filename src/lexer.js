@@ -27,6 +27,7 @@ export function jumpPosition (position, str, end) {
 export function makeInitialPosition () {
   return {
     index: 0,
+    absIndex: 0,
     column: 0,
     line: 0
   }
@@ -35,6 +36,7 @@ export function makeInitialPosition () {
 export function copyPosition (position) {
   return {
     index: position.index,
+    absIndex: position.absIndex,
     line: position.line,
     column: position.column
   }
@@ -54,10 +56,19 @@ export default function lexer (str, options) {
 export function lex (state) {
   const {str, options: {childlessTags}} = state
   const len = str.length
+  var tagStart = 0;
+  var tagEnd = 0;
+  var tagLength = 0;
   while (state.position.index < len) {
     const start = state.position.index
-    lexText(state)
+    if (tagEnd) {
+      tagLength = tagLength + (tagEnd - tagStart)
+    }
+    lexText(state, tagLength)
+    tagStart = 0
+    tagEnd = 0
     if (state.position.index === start) {
+      tagStart = state.position.index
       const isComment = startsWith(str, '!--', start + 1)
       if (isComment) {
         lexComment(state)
@@ -68,6 +79,7 @@ export function lex (state) {
           lexSkipTag(tagName, state)
         }
       }
+      tagEnd = state.position.index
     }
   }
 }
@@ -87,7 +99,7 @@ export function findTextEnd (str, index) {
   }
 }
 
-export function lexText (state) {
+export function lexText (state, tagLength) {
   const type = 'text'
   const {str, position} = state
   let textEnd = findTextEnd(str, position.index)
@@ -96,10 +108,13 @@ export function lexText (state) {
     textEnd = str.length
   }
 
-  const start = copyPosition(position)
+  if (!tagLength) tagLength = 0
+  var start = copyPosition(position)
+  start.absIndex = start.index - tagLength
   const content = str.slice(position.index, textEnd)
   jumpPosition(position, str, textEnd)
-  const end = copyPosition(position)
+  var end = copyPosition(position)
+  end.absIndex = end.index - tagLength - 1
   state.tokens.push({type, content, position: {start, end}})
 }
 
