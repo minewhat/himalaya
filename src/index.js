@@ -15,7 +15,7 @@ export const parseDefaults = {
   closingTags,
   childlessTags,
   closingTagAncestorBreakers,
-  includePositions: false
+  includePositions: true
 }
 
 export function parse (str, options = parseDefaults) {
@@ -28,10 +28,10 @@ export function stringify (ast, options = parseDefaults) {
   return toHTML(ast, options)
 }
 
-export function updateJson(mode, jsonArray, text, range, attributes) {
-  return caiparser.updateJson(mode, jsonArray, text, range, attributes);
+export function updateJson (mode, jsonArray, text, range, attributes) {
+  return caiparser.updateJson(mode, jsonArray, text, range, attributes)
 }
 
-export function getRangeAttributes(tokens, range) {
-  return caiparser.getRangeAttributes(tokens, range);
+export function getRangeAttributes (tokens, range) {
+  return caiparser.getRangeAttributes(tokens, range)
 }

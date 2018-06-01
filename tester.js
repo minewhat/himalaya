@@ -33,7 +33,7 @@
 var lexer = require('./lib/index')
 var jsonModifier = require('./lib/caiparser')
 
-const str = "This is just a <span class='no-reset' style='color:#0000ff;font-weight:bold;'>sample te</span><span class='no-reset' style='color:#0000ff;font-style:italic;'>xt written</span> to test all cases";
+const str = " Hand picked<br><span style='color:blue'>items</span> for<br>this season ";
 const content = " Hand pickeditems forthis season ";
 const options = {childlessTags: []}
 const tokens = lexer.parse(str)
@@ -42,7 +42,7 @@ const tokens = lexer.parse(str)
 
 var range = {
     'start': 9,
-    'end': 30
+    'end': 15
 }
 
 console.log(JSON.stringify(jsonModifier.getRangeAttributes(tokens, range)));
@@ -56,7 +56,7 @@ var attributes = {
 
 var mode = "update";
 
-var updatedJson = jsonModifier.default(mode, tokens, content, range, attributes);
+var updatedJson = jsonModifier.updateJson(mode, tokens, content, range, attributes);
 
 // console.log("****************************** UPDATED JSON ************************************");
 // console.log(updatedJson);
