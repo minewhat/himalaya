@@ -1,5 +1,5 @@
-// exports.default = updateJson;
-// exports.getRangeAttributes = getRangeAttributes;
+exports.default = updateJson;
+exports.getRangeAttributes = getRangeAttributes;
 
 function convertHimalayaAtrributes (attributes) {
   var result = {}
@@ -20,7 +20,8 @@ function convertHimalayaAtrributes (attributes) {
 }
 
 function mergeStyles (newStyle, oldStyle) {
-  oldStyle = oldStyle || {}
+  oldStyle = JSON.parse(JSON.stringify(oldStyle || {}));
+  newStyle = JSON.parse(JSON.stringify(newStyle || {}));
 
   for (var key in oldStyle) {
     if (newStyle[key]) {
@@ -141,6 +142,14 @@ function getSelectionNode (attributes, extraAttributes, result) {
   }
 
   if (selectionNode) {
+    attributes = JSON.parse(JSON.stringify(attributes));
+    for(var key in extraAttributes) {
+      if(key == "style") {
+        attributes['style'] = mergeStyles(extraAttributes['style'], attributes['style']);
+      } else {
+        attributes[key] = extraAttributes[key];
+      }
+    }
     var currentAttributes = JSON.parse(JSON.stringify(selectionNode.attributes))
     currentAttributes = convertHimalayaAtrributes(currentAttributes)
     if (attributesAreEqual(currentAttributes, attributes)) {
@@ -148,7 +157,7 @@ function getSelectionNode (attributes, extraAttributes, result) {
     }
 
     selectionNode = getNewSpanNode()
-    selectionNode = setAttributes(selectionNode, extraAttributes, attributes)
+    selectionNode = setAttributes(selectionNode, attributes)
     result.push(selectionNode)
     return selectionNode
   }
@@ -523,7 +532,7 @@ function processNode (node, start, end, attributes) {
 }
 
 // Starting point.
-export function updateJson (mode, jsonArray, text, range, attributes) {
+function updateJson (mode, jsonArray, text, range, attributes) {
   var result = []
   var currentIdx = 0
   content = text
@@ -559,7 +568,7 @@ function getStyleAttributes (attributes) {
   }
 }
 
-export function getRangeAttributes (tokens, range) {
+function getRangeAttributes (tokens, range) {
   var result = []
   var start = range.start
   var end = range.end
