@@ -1,5 +1,5 @@
-exports.default = updateJson;
-exports.getRangeAttributes = getRangeAttributes;
+// exports.default = updateJson;
+// exports.getRangeAttributes = getRangeAttributes;
 
 function convertHimalayaAtrributes (attributes) {
   var result = {}
@@ -532,7 +532,7 @@ function processNode (node, start, end, attributes) {
 }
 
 // Starting point.
-function updateJson (mode, jsonArray, text, range, attributes) {
+export function updateJson (mode, jsonArray, text, range, attributes) {
   var result = []
   var currentIdx = 0
   content = text
@@ -568,7 +568,7 @@ function getStyleAttributes (attributes) {
   }
 }
 
-function getRangeAttributes (tokens, range) {
+export function getRangeAttributes (tokens, range) {
   var result = []
   var start = range.start
   var end = range.end
