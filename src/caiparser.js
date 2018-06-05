@@ -581,7 +581,18 @@ function getRangeAttributes (tokens, range) {
         for (var j = 0; j < childNodes.length; j++) {
           var childNode = childNodes[j]
           if (childNode.type == 'text') {
-            if (childNode.position.start.absIndex >= start && childNode.position.start.absIndex <= end) {
+
+            if(start > childNode.position.start.absIndex && end < childNode.position.end.absIndex) {
+              result.push({
+                range: {
+                  start: start,
+                  end: end
+                },
+                attributes: {
+                  style: getStyleAttributes(node.attributes)
+                }
+              })
+            } else if (childNode.position.start.absIndex >= start && childNode.position.start.absIndex <= end) {
               result.push({
                 range: {
                   start: childNode.position.start.absIndex > start ? childNode.position.start.absIndex : start,
