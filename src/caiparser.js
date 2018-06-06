@@ -72,24 +72,23 @@ function styleToJson (stylStr) {
   return obj
 }
 
+function camelCaseToDash (str) {
+  return str
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .replace(/([0-9])([^0-9])/g, '$1-$2')
+      .replace(/([^0-9])([0-9])/g, '$1-$2')
+      .replace(/-+/g, '-')
+      .toLowerCase();
+}
+
 // Given a json, converts it to css style string.
 function jsonToStyle (json) {
   var str = ''
 
   for (var key in json) {
-    switch (key) {
-      case 'color':
-        str += 'color:' + json[key] + ';'
-        break
-
-      case 'fontWeight':
-        str += 'font-weight:' + json[key] + ';'
-        break
-
-      case 'fontStyle':
-        str += 'font-style:' + json[key] + ';'
-        break
-    }
+    str += camelCaseToDash(key) + ":" + json[key] + ';';
   }
 
   return str
@@ -202,7 +201,7 @@ function processNode (node, start, end, attributes) {
       if (node.position.start.absIndex == start) {
         if (node.position.end.absIndex == end) {
           span = getNewSpanNode()
-          span.children.push(JSON.parse(JSON.stringify(node))) // TODO better to take copy of node
+          span.children.push(JSON.parse(JSON.stringify(node)))
           span = setAttributes(span, attributes)
           result.push(span)
           done = true
@@ -210,24 +209,30 @@ function processNode (node, start, end, attributes) {
           span = getNewSpanNode()
           text = getNewTextNode()
           text.content = content.substring(start, end + 1)
-          span.children.push(text)
-          span = setAttributes(span, attributes)
-          result.push(span)
+          if(text.content) {
+            span.children.push(text)
+            span = setAttributes(span, attributes)
+            result.push(span)
+          }
 
           text = getNewTextNode()
           text.content = content.substring(end + 1, node.position.end.absIndex + 1)
-          result.push(text)
+          if(text.content) {
+            result.push(text)
+          }
 
           done = true
         } else if (node.position.end.absIndex < end) {
           span = getNewSpanNode()
           text = getNewTextNode()
           text.content = content.substring(start, node.position.end.absIndex + 1)
-          span.children.push(text)
-          span = setAttributes(span, attributes)
-          result.push(span)
-
-          selectionNode = span
+          if(text.content) {
+            span.children.push(text)
+            span = setAttributes(span, attributes)
+            result.push(span)
+  
+            selectionNode = span
+          }
           done = false
         }
       } else if (node.position.start.absIndex < start) {
@@ -235,46 +240,60 @@ function processNode (node, start, end, attributes) {
           if (node.position.end.absIndex == end) {
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, start)
-            result.push(text)
+            if(text.content) {
+              result.push(text)
+            }
 
             span = getNewSpanNode()
             text = getNewTextNode()
             text.content = content.substring(start, node.position.end.absIndex + 1)
-            span.children.push(text)
-            span = setAttributes(span, attributes)
-            result.push(span)
+            if(text.content) {
+              span.children.push(text)
+              span = setAttributes(span, attributes)
+              result.push(span)
+            }
 
             done = true
           } else if (node.position.end.absIndex > end) {
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, start)
-            result.push(text)
+            if(text.content) {
+              result.push(text)
+            }
 
             span = getNewSpanNode()
             text = getNewTextNode()
             text.content = content.substring(start, end + 1)
-            span.children.push(text)
-            span = setAttributes(span, attributes)
-            result.push(span)
+            if(text.content) {
+              span.children.push(text)
+              span = setAttributes(span, attributes)
+              result.push(span)
+            }
 
             text = getNewTextNode()
             text.content = content.substring(end + 1, node.position.end.absIndex + 1)
-            result.push(text)
+            if(text.content) {
+              result.push(text)
+            }
 
             done = true
           } else if (node.position.end.absIndex < end) {
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, start)
-            result.push(text)
+            if(text.content) {
+              result.push(text)
+            }
 
             span = getNewSpanNode()
             text = getNewTextNode()
             text.content = content.substring(start, node.position.end.absIndex + 1)
-            span.children.push(text)
-            span = setAttributes(span, attributes)
-            result.push(span)
+            if(text.content) {
+              span.children.push(text)
+              span = setAttributes(span, attributes)
+              result.push(span)
+              selectionNode = span
+            }
 
-            selectionNode = span
             done = false
           }
         } else {
@@ -287,24 +306,32 @@ function processNode (node, start, end, attributes) {
             span = selectionNode
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, node.position.end.absIndex + 1)
-            span.children.push(text)
+            if(text.content) {
+              span.children.push(text)
+            }
             done = true
           } else if (node.position.end.absIndex > end) {
             span = selectionNode
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, end + 1)
-            span.children.push(text)
+            if(text.content) {
+              span.children.push(text)
+            }
 
             text = getNewTextNode()
             text.content = content.substring(end + 1, node.position.end.absIndex + 1)
-            result.push(text)
+            if(text.content) {
+              result.push(text)
+            }
 
             done = true
           } else if (node.position.end.absIndex < end) {
             span = selectionNode
             text = getNewTextNode()
             text.content = content.substring(node.position.start.absIndex, node.position.end.absIndex + 1)
-            span.children.push(text)
+            if(text.content) {
+              span.children.push(text)
+            }
 
             done = false
           }
@@ -356,31 +383,39 @@ function processNode (node, start, end, attributes) {
                     span = getNewSpanNode()
                     text = getNewTextNode()
                     text.content = content.substring(start, end + 1)
-                    span.children.push(text)
-                    span = setAttributes(span, attributes, originalAttributesJson)
-                    result.push(span)
+                    if(text.content) {
+                      span.children.push(text)
+                      span = setAttributes(span, attributes, originalAttributesJson)
+                      result.push(span)
+                    }
 
                     done = true
 
                     var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate)) // TODO clone currentSpanTemplate
                     text = getNewTextNode()
                     text.content = content.substring(end + 1, childNode.position.end.absIndex + 1)
-                    currentSpanClone.children.push(text)
+                    if(text.content) {
+                      currentSpanClone.children.push(text)
+                    }
                     node.children.forEach(function (n, idx) {
                       if (idx != i) {
                         currentSpanClone.children.push(n)
                       }
                     })
-                    result.push(currentSpanClone)
+                    if(currentSpanClone.children.length) {
+                      result.push(currentSpanClone)
+                    }
                   } else if (childNode.position.end.absIndex < end) {
                     span = getNewSpanNode()
                     text = getNewTextNode()
                     text.content = content.substring(start, childNode.position.end.absIndex + 1)
-                    span.children.push(text)
-                    span = setAttributes(span, attributes, originalAttributesJson)
-                    result.push(span)
+                    if(text.content) {
+                      span.children.push(text)
+                      span = setAttributes(span, attributes, originalAttributesJson)
+                      result.push(span)
+                      selectionNode = span
+                    }
 
-                    selectionNode = span
                     done = false
                   }
                 } else if (childNode.position.start.absIndex < start) {
@@ -388,16 +423,20 @@ function processNode (node, start, end, attributes) {
                     if (childNode.position.end.absIndex == end) {
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, start)
-                      var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
-                      currentSpanClone.children.push(text)
-                      result.push(currentSpanClone)
+                      if(text.content) {
+                        var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
+                        currentSpanClone.children.push(text)
+                        result.push(currentSpanClone)
+                      }
 
                       span = getNewSpanNode()
                       text = getNewTextNode()
                       text.content = content.substring(start, childNode.position.end.absIndex + 1)
-                      span.children.push(text)
-                      span = setAttributes(span, attributes, originalAttributesJson)
-                      result.push(span)
+                      if(text.content) {
+                        span.children.push(text)
+                        span = setAttributes(span, attributes, originalAttributesJson)
+                        result.push(span)
+                      }
 
                       done = true
 
@@ -405,20 +444,26 @@ function processNode (node, start, end, attributes) {
                       for (var j = i + 1; j < childNodes.length; j++) {
                         currentSpanClone.children.push(childNodes[i])
                       }
-                      result.push(currentSpanClone)
+                      if(currentSpanClone.children.length) {
+                        result.push(currentSpanClone)
+                      }
                     } else if (childNode.position.end.absIndex > end) {
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, start)
-                      var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
-                      currentSpanClone.children.push(text)
-                      result.push(currentSpanClone)
+                      if(text.content) {
+                        var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
+                        currentSpanClone.children.push(text)
+                        result.push(currentSpanClone)
+                      }
 
                       span = getNewSpanNode()
                       text = getNewTextNode()
                       text.content = content.substring(start, end + 1)
-                      span.children.push(text)
-                      span = setAttributes(span, attributes, originalAttributesJson)
-                      result.push(span)
+                      if(text.content) {
+                        span.children.push(text)
+                        span = setAttributes(span, attributes, originalAttributesJson)
+                        result.push(span)
+                      }
 
                       done = true
 
@@ -426,27 +471,35 @@ function processNode (node, start, end, attributes) {
 
                       text = getNewTextNode()
                       text.content = content.substring(end + 1, childNode.position.end.absIndex + 1)
-                      currentSpanClone.children.push(text)
+                      if(text.content) {
+                        currentSpanClone.children.push(text)
+                      }
 
                       for (var j = i + 1; j < childNodes.length; j++) {
                         currentSpanClone.children.push(childNodes[i])
                       }
-                      result.push(currentSpanClone)
+                      if(currentSpanClone.children.length) {
+                        result.push(currentSpanClone)
+                      }
                     } else if (childNode.position.end.absIndex < end) {
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, start)
-                      var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
-                      currentSpanClone.children.push(text)
-                      result.push(currentSpanClone)
+                      if(text.content) {
+                        var currentSpanClone = JSON.parse(JSON.stringify(currentSpanTemplate))
+                        currentSpanClone.children.push(text)
+                        result.push(currentSpanClone)
+                      }
 
                       span = getNewSpanNode()
                       text = getNewTextNode()
                       text.content = content.substring(start, childNode.position.end.absIndex + 1)
-                      span.children.push(text)
-                      span = setAttributes(span, attributes, originalAttributesJson)
-                      result.push(span)
+                      if(text.content) {
+                        span.children.push(text)
+                        span = setAttributes(span, attributes, originalAttributesJson)
+                        result.push(span)
+                        selectionNode = span
+                      }
 
-                      selectionNode = span
                       done = false
                     }
                   } else {
@@ -460,7 +513,9 @@ function processNode (node, start, end, attributes) {
                       span = getSelectionNode(originalAttributesJson, attributes, result)// selectionNode;
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, end + 1)
-                      span.children.push(text)
+                      if(text.content) {
+                        span.children.push(text)
+                      }
 
                       done = true
 
@@ -468,12 +523,16 @@ function processNode (node, start, end, attributes) {
                       for (var j = i + 1; j < childNodes.length; j++) {
                         currentSpanClone.children.push(childNodes[i])
                       }
-                      result.push(currentSpanClone)
+                      if(currentSpanClone.children.length) {
+                        result.push(currentSpanClone)
+                      }
                     } else if (childNode.position.end.absIndex > end) {
                       span = getSelectionNode(originalAttributesJson, attributes, result)// selectionNode;
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, end + 1)
-                      span.children.push(text)
+                      if(text.content) {
+                        span.children.push(text)
+                      }
 
                       done = true
 
@@ -481,17 +540,23 @@ function processNode (node, start, end, attributes) {
 
                       text = getNewTextNode()
                       text.content = content.substring(end + 1, childNode.position.end.absIndex + 1)
-                      currentSpanClone.children.push(text)
+                      if(text.content) {
+                        currentSpanClone.children.push(text)
+                      }
 
                       for (var j = i + 1; j < childNodes.length; j++) {
                         currentSpanClone.children.push(childNodes[i])
                       }
-                      result.push(currentSpanClone)
+                      if(currentSpanClone.children.length) {
+                        result.push(currentSpanClone)
+                      }
                     } else if (childNode.position.end.absIndex < end) {
                       span = getSelectionNode(originalAttributesJson, attributes, result)// selectionNode;
                       text = getNewTextNode()
                       text.content = content.substring(childNode.position.start.absIndex, childNode.position.end.absIndex + 1)
-                      span.children.push(text)
+                      if(text.content) {
+                        span.children.push(text)
+                      }
 
                       done = false
                     }
@@ -531,17 +596,81 @@ function processNode (node, start, end, attributes) {
   return result
 }
 
+function removeBlankTokens(tokens) {
+  var woBlankEntries = [];
+  tokens.forEach(function(token) {
+    if(token.type == "text") {
+      if(token.content)
+        woBlankEntries.push(token);
+    } else if (token.type == "span") {
+      if(token.children && token.children.length) {
+        var children = [];
+        token.children.forEach(function(child){
+          if(child.type == "text") {
+            if(child.content) {
+              children.push(child);
+            }
+          } else {
+            children.push(child);
+          }
+        });
+        if(children && children.length) {
+          token.children = children;
+          woBlankEntries.push(token);
+        }
+      }
+    } else {
+      woBlankEntries.push(token);
+    }
+  });
+
+  return woBlankEntries;
+}
+
+function mergeSimilarTokens(tokens) {
+  var mergedTokens = [];
+
+  for(var i = 0; i < tokens.length; i++) {
+    if(!tokens[i+1] || tokens[i].type == "text" || tokens[i+1].type == "text") {
+      mergedTokens.push(tokens[i]);
+    } else {
+      var currentToken = tokens[i];
+      var nextToken = tokens[i+1];
+      var currentTokenAttr = currentToken.attributes;
+      var nextTokenAttr = nextToken.attributes;
+      var currentTokenAttr = convertHimalayaAtrributes(currentTokenAttr);
+      var nextTokenAttr = convertHimalayaAtrributes(nextTokenAttr);
+      if(attributesAreEqual(currentTokenAttr, nextTokenAttr)) {
+        var currentChildren = tokens[i].children;
+        tokens[i+1].children = currentChildren.concat(tokens[i+1].children);
+      } else {
+        mergedTokens.push(tokens[i]); 
+      }
+    }
+  }
+
+  return mergedTokens;
+}
+
+function optimizeTokens(tokens) {
+  tokens = removeBlankTokens(tokens);
+  tokens = mergeSimilarTokens(tokens);
+  return tokens;
+}
+
 // Starting point.
-export function updateJson (mode, jsonArray, text, range, attributes) {
+function updateJson (mode, jsonArray, text, range, attributes) {
   var result = []
   var currentIdx = 0
   content = text
-  operationMode = mode
+  operationMode = mode;
+  done = false;
+  selectionNode = null;
   // Loop through each node and call processNode;
   for (var i = 0; i < jsonArray.length; i++) {
     currentIdx = i
     if (!done) {
-      var node = jsonArray[i]
+      var node = jsonArray[i];
       result = result.concat(processNode(node, range.start, range.end, attributes))
       if (done) {
         currentIdx++
@@ -554,6 +683,8 @@ export function updateJson (mode, jsonArray, text, range, attributes) {
   for (var i = currentIdx; i < jsonArray.length; i++) {
     result.push(jsonArray[i])
   }
+
+  result = optimizeTokens(result);
 
   return result // Final new himalayan json;
 }
@@ -568,7 +699,7 @@ function getStyleAttributes (attributes) {
   }
 }
 
-export function getRangeAttributes (tokens, range) {
+function getRangeAttributes (tokens, range) {
   var result = []
   var start = range.start
   var end = range.end
@@ -643,3 +774,8 @@ export function getRangeAttributes (tokens, range) {
 
   return result
 }
+
+export default {
+  getRangeAttributes: getRangeAttributes,
+  updateJson: updateJson
+};
